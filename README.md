@@ -5,7 +5,7 @@ Repositorio del grupo. Partir de este esqueleto. No borrar la estructura de `src
 ## Integrantes
 
 | Nombre | Mail | GitHub |
-| --- | --- | --- |
+| Rivas Thomas| thomasrivas100@gmail.com | thomasrivas593  |
 |  |  |  |
 |  |  |  |
 |  |  |  |
