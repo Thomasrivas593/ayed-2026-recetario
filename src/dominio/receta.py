@@ -1,3 +1,4 @@
+#creo la clase receta con sus atributos y metodos
 class Receta:
     def __init__ (self, id_receta, nombre, tiempo_min, dificultad, categoria) :
         self.id = id_receta
