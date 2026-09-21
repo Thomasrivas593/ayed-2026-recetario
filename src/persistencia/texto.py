@@ -31,3 +31,22 @@ def cargar_recetas(ruta="data/recetas.csv"):
             )
             recetas.append(receta)
     return recetas        
+
+
+import csv
+import os
+
+
+def cargar_relaciones_subrecetas(ruta="data/relaciones_subrecetas.csv"):
+    relaciones = []
+    if os.path.exists(ruta):
+        with open(ruta, mode="r", encoding="utf-8") as archivo:
+            lector = csv.DictReader(archivo)
+            for fila in lector:
+                relaciones.append((fila["receta_id"], fila["subreceta_id"]))
+    else:
+        # Relaciones por defecto si todavía no existe el archivo
+        relaciones.append(("10", "3"))
+        relaciones.append(("10", "4"))
+        
+    return relaciones

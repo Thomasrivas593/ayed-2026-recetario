@@ -1,5 +1,6 @@
 from src.config import TEMA
-from src.persistencia.texto import cargar_recetas
+from src.dominio.recetario import Recetario
+from src.persistencia.texto import cargar_recetas, cargar_relaciones_subrecetas
 
 TEMAS = {
     "pokedex": "Pokédex",
@@ -84,6 +85,56 @@ def main():
         elif opcion == "2":
             ver_detalle(recetas)
         elif opcion in {"3", "4", "5", "6", "7", "8", "9"}:
+            pendiente()
+        else:
+            print("Opción inválida.")
+
+
+def operacion_recursiva(recetario):
+    """Ejecuta la función recursiva del dominio requerida en E2."""
+    id_receta = input("Ingrese el ID de la receta a desglosar: ").strip()
+    receta = recetario.obtener_por_id(id_receta)
+    if not receta:
+        print(f"\n[!] La receta con ID '{id_receta}' no existe en el catálogo.")
+        return
+
+    desglose = recetario.desglosar_subrecetas(id_receta)
+    print(f"\n--- Desglose Recursivo de Componentes para ID '{id_receta}' ---")
+    print(f"Secuencia de IDs desglosados: {desglose}")
+    print("Detalle de componentes:")
+    for sub_id in desglose:
+        item = recetario.obtener_por_id(sub_id)
+        nombre = item.nombre if item else "(Subreceta base)"
+        print(f" - [{sub_id}] {nombre}")
+    print("----------------------------------------------------------")
+
+
+def main():
+    if TEMA not in TEMAS:
+        print("Seteá TEMA en src/config.py: 'pokedex', 'recetario' o 'musica'.")
+        return
+
+    # Inicializamos el dominio
+    recetario = Recetario(recetas=cargar_recetas())
+
+    # Cargamos y asociamos las relaciones de subrecetas
+    relaciones = cargar_relaciones_subrecetas()
+    for id_receta, id_subreceta in relaciones:
+        recetario.asociar_subreceta(id_receta, id_subreceta)
+
+    opcion = None
+    while opcion != "0":
+        mostrar_menu()
+        opcion = input("> ").strip()
+        if opcion == "0":
+            print("Chau.")
+        elif opcion == "1":
+            listar_catalogo(recetario)
+        elif opcion == "2":
+            ver_detalle(recetario)
+        elif opcion == "5":
+            operacion_recursiva(recetario)
+        elif opcion in {"3", "4", "6", "7", "8", "9"}:
             pendiente()
         else:
             print("Opción inválida.")
