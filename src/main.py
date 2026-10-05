@@ -2,16 +2,20 @@ from src.config import TEMA
 from src.dominio.recetario import Recetario
 from src.persistencia.texto import cargar_recetas, cargar_relaciones_subrecetas
 
+# --- IMPORTS AGREGADOS PARA LA ENTREGA 3 ---
+from src.dominio.menu_semanal import MenuSemanal
+from src.tads.pila import Pila
+from src.tads.cola import Cola
+from src.excepciones import ColeccionLlenaError, PilaVaciaError, ColaVaciaError
+
 TEMAS = {
     "pokedex": "Pokédex",
     "recetario": "Recetario",
     "musica": "Biblioteca musical",
 }
 
-
 def pendiente():
     print("Todavía no está implementado. Completar en la entrega que corresponde.")
-
 
 def mostrar_menu():
     nombre = TEMAS.get(TEMA, TEMA or "(sin tema)")
@@ -22,12 +26,11 @@ def mostrar_menu():
     print("3. Buscar")
     print("4. Ordenar")
     print("5. Operación recursiva")
-    print("6. Colección principal (equipo / menú / playlist)")
+    print("6. Colección principal (Menú)")
     print("7. Historial (pila)")
     print("8. Cola")
     print("9. Guardar / cargar archivos")
     print("0. Salir")
-
 
 def listar_catalogo(recetas):
     """Muestra todas las recetas cargadas en formato tabla."""
@@ -42,7 +45,6 @@ def listar_catalogo(recetas):
         print(f"{r.id:<6} {r.nombre:<32} {f'{r.tiempo_min} min':<12} {r.dificultad:<14} {r.categoria}")
     print("=" * 78)
     print(f"Total: {len(recetas)} recetas registradas.")
-
 
 def ver_detalle(recetas):
     """Permite ingresar un ID y muestra la ficha individual."""
@@ -65,31 +67,6 @@ def ver_detalle(recetas):
     else:
         print(f"\n[!] No se encontró ninguna receta con ID '{id_buscado}'.")
 
-
-def main():
-    if TEMA not in TEMAS:
-        print("Seteá TEMA en src/config.py: 'pokedex', 'recetario' o 'musica'.")
-        return
-
-    # Cargamos el dataset al inicio
-    recetas = cargar_recetas()
-
-    opcion = None
-    while opcion != "0":
-        mostrar_menu()
-        opcion = input("> ").strip()
-        if opcion == "0":
-            print("Chau.")
-        elif opcion == "1":
-            listar_catalogo(recetas)
-        elif opcion == "2":
-            ver_detalle(recetas)
-        elif opcion in {"3", "4", "5", "6", "7", "8", "9"}:
-            pendiente()
-        else:
-            print("Opción inválida.")
-
-
 def operacion_recursiva(recetario):
     """Ejecuta la función recursiva del dominio requerida en E2."""
     id_receta = input("Ingrese el ID de la receta a desglosar: ").strip()
@@ -108,14 +85,18 @@ def operacion_recursiva(recetario):
         print(f" - [{sub_id}] {nombre}")
     print("----------------------------------------------------------")
 
-
 def main():
     if TEMA not in TEMAS:
         print("Seteá TEMA en src/config.py: 'pokedex', 'recetario' o 'musica'.")
         return
 
-    # Inicializamos el dominio
+    # Inicializamos el dominio base
     recetario = Recetario(recetas=cargar_recetas())
+
+    # Inicializamos las estructuras de la Entrega 3
+    menu_coleccion = MenuSemanal(tope=6)
+    historial = Pila()
+    cola_preparacion = Cola()
 
     # Cargamos y asociamos las relaciones de subrecetas
     relaciones = cargar_relaciones_subrecetas()
@@ -126,19 +107,74 @@ def main():
     while opcion != "0":
         mostrar_menu()
         opcion = input("> ").strip()
+        
         if opcion == "0":
             print("Chau.")
+        
         elif opcion == "1":
             listar_catalogo(recetario)
+            historial.apilar("El usuario listó el catálogo de recetas.")
+        
         elif opcion == "2":
             ver_detalle(recetario)
+            historial.apilar("El usuario consultó el detalle de una receta.")
+            
         elif opcion == "5":
             operacion_recursiva(recetario)
-        elif opcion in {"3", "4", "6", "7", "8", "9"}:
+            historial.apilar("El usuario ejecutó la operación recursiva.")
+            
+        # --- OPCIONES DE LA ENTREGA 3 ---
+        elif opcion == "6":
+            print("\n--- Menú Semanal (Colección con Tope) ---")
+            print("A. Agregar receta")
+            print("B. Listar menú")
+            sub6 = input("Opción: ").strip().upper()
+            
+            if sub6 == "A":
+                receta_nueva = input("Nombre de la receta a agregar: ").strip()
+                try:
+                    menu_coleccion.agregar(receta_nueva)
+                    print(f"[OK] '{receta_nueva}' agregada al menú semanal.")
+                    historial.apilar(f"Se agregó '{receta_nueva}' al menú semanal.")
+                except ColeccionLlenaError as e:
+                    print(f"[ERROR] {e}")
+            elif sub6 == "B":
+                print("\nListado actual del menú:")
+                menu_coleccion.listar()
+                
+        elif opcion == "7":
+            print("\n--- Historial de Acciones (Pila) ---")
+            try:
+                accion_deshecha = historial.desapilar()
+                print(f"[DESHECHO] Se eliminó del historial: '{accion_deshecha}'")
+            except PilaVaciaError as e:
+                print(f"[ERROR] {e}")
+                
+        elif opcion == "8":
+            print("\n--- Cola de Preparación ---")
+            print("A. Encolar receta para cocinar")
+            print("B. Terminar preparación (desencolar)")
+            sub_opcion = input("Elija una opción: ").strip().upper()
+            
+            if sub_opcion == "A":
+                receta_encolar = input("Nombre de la receta: ").strip()
+                cola_preparacion.encolar(receta_encolar)
+                print(f"[OK] '{receta_encolar}' puesta en cola de preparación.")
+                historial.apilar(f"Se encoló '{receta_encolar}' para preparación.")
+            elif sub_opcion == "B":
+                try:
+                    receta_lista = cola_preparacion.desencolar()
+                    print(f"[OK] ¡Preparación terminada! Salió: '{receta_lista}'")
+                    historial.apilar(f"Se terminó de preparar '{receta_lista}'.")
+                except ColaVaciaError as e:
+                    print(f"[ERROR] {e}")
+            else:
+                print("Opción inválida.")
+                
+        elif opcion in {"3", "4", "9"}:
             pendiente()
         else:
             print("Opción inválida.")
-
 
 if __name__ == "__main__":
     main()

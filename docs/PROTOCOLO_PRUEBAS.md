@@ -16,10 +16,10 @@ Mínimos: 8 casos escritos en E2; ejecutados en E3; 15 de regresión en E6 (pila
 | `P06` | E2 | Ver el detalle de un ítem que NO existe | Opción 2, ID: 9999 | mensaje claro, no se corta el programa |  No se encontró ninguna receta con ID '9999' | pasa |
 | `P07` | E2 | Elegir una opción de menú inválida (ej. "32") | Opción: 9z | vuelve a mostrar el menú | devuelve `opcion invalida` | pasa |
 | `P08` | E2 | Pasar enter vacío en el menú | Opción: "" | no explota; vuelve a preguntar | devuelve `opcion invalida` | pasa |
-| P05 | E3 | Agregar a la colección principal hasta el tope | equipo de 6 / equivalente | el séptimo falla con excepción propia |  |  |
-| P06 | E3 | Desapilar historial vacío | pila vacía | excepción propia, menú sigue |   |  |
-| P07 | E3 | Desencolar cola vacía | cola vacía | excepción propia, menú sigue |  |  |
-| P08 | E3 | Listar colección con el iterador | 2+ ítems | el orden coincide con las inserciones |  |  |
+| P05 | E3 | Agregar a la colección principal hasta el tope | equipo de 6 / equivalente | el séptimo falla con excepción propia |devuelve "El menú está lleno (máximo 6). No se puede agregar más"  | pasa |
+| P06 | E3 | Desapilar historial vacío | pila vacía | excepción propia, menú sigue | devuelve "No hay acciones en el historial para deshacer"  | pasa |
+| P07 | E3 | Desencolar cola vacía | cola vacía | excepción propia, menú sigue | devuelve "No hay recetas en la cola" | pasa |
+| P08 | E3 | Listar colección con el iterador | 2+ ítems | el orden coincide con las inserciones | devuelve "Listado actual del menú:(las recetas agregadas)" | pasa |
 | P09 | E4 | Búsqueda lineal de un nombre que existe |  | lo encuentra |  |  |
 | P10 | E4 | Búsqueda lineal de un nombre que no existe |  | no encontrado, sin traceback |  |  |
 | P11 | E4 | Búsqueda binaria con catálogo desordenado |  | avisa o reordena; no da un falso hit |  |  |

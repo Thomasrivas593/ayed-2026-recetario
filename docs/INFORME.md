@@ -39,9 +39,9 @@ En este tema, cada item es una receta, representada por la entidad del mismo nom
 
 | TAD | Operaciones | Invariante |
 | --- | --- | --- |
-| ListaEnlazada |  |  |
-| Pila |  |  |
-| Cola |  |  |
+| ListaEnlazada |esta_vacia(), tamanio(), insertar_al_inicio(dato), insertar_al_final(dato), insertar_ordenado(dato, clave), eliminar(dato), buscar(dato), __iter__()  |  |
+| Pila | apilar(dato), desapilar(), ver_tope(), esta_vacia() |  |
+| Cola | encolar(dato), desencolar(), ver_frente(), esta_vacia() |  |
 
 Dónde se usa cada uno en el dominio.
 
