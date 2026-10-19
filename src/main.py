@@ -8,6 +8,10 @@ from src.tads.pila import Pila
 from src.tads.cola import Cola
 from src.excepciones import ColeccionLlenaError, PilaVaciaError, ColaVaciaError
 
+# --- IMPORTS AGREGADOS PARA LA ENTREGA 4 ---
+from src.algoritmos.busqueda import busqueda_lineal, busqueda_binaria
+from src.algoritmos.ordenamiento import ordenar_seleccion, ordenar_insercion, ordenar_shell
+
 TEMAS = {
     "pokedex": "Pokédex",
     "recetario": "Recetario",
@@ -171,7 +175,60 @@ def main():
             else:
                 print("Opción inválida.")
                 
-        elif opcion in {"3", "4", "9"}:
+        # --- OPCIONES DE LA ENTREGA 4 ---
+        elif opcion == "3":
+            print("\n--- Buscar Receta ---")
+            print("1. Por Nombre (Lineal)")
+            print("2. Por Nombre (Binaria - requiere orden)")
+            sub = input("> ").strip()
+            
+            lista_recetas = recetario.obtener_todas()
+            clave_buscada = input("Ingrese el nombre a buscar: ").strip().lower()
+            
+            if sub == "1":
+                resultado = busqueda_lineal(lista_recetas, clave_buscada, lambda r: r.nombre.lower())
+                print(f"[ENCONTRADO] {resultado.nombre}" if resultado else "[!] No encontrado.")
+            elif sub == "2":
+                print("[!] Ordenando catálogo por nombre para usar búsqueda binaria...")
+                ordenar_insercion(lista_recetas, lambda r: r.nombre.lower())
+                resultado = busqueda_binaria(lista_recetas, clave_buscada, lambda r: r.nombre.lower())
+                print(f"[ENCONTRADO] {resultado.nombre}" if resultado else "[!] No encontrado.")
+            else:
+                print("Opción inválida.")
+                
+        elif opcion == "4":
+            print("\n--- Ordenar Catálogo ---")
+            print("Criterios: 1) Nombre   2) Tiempo de preparación")
+            criterio = input("> ").strip()
+            
+            print("Algoritmos: 1) Selección  2) Inserción  3) Shell Sort (Extra)")
+            algo = input("> ").strip()
+            
+            lista_recetas = recetario.obtener_todas()
+            
+            if criterio == "1":
+                clave_fn = lambda r: r.nombre.lower()
+                nom_crit = "Nombre"
+            elif criterio == "2":
+                clave_fn = lambda r: r.tiempo_min
+                nom_crit = "Tiempo"
+            else:
+                print("Criterio inválido.")
+                continue
+            
+            if algo == "1":
+                ordenar_seleccion(lista_recetas, clave_fn)
+                print(f"[OK] Catálogo ordenado por {nom_crit} (Selección).")
+            elif algo == "2":
+                ordenar_insercion(lista_recetas, clave_fn)
+                print(f"[OK] Catálogo ordenado por {nom_crit} (Inserción).")
+            elif algo == "3":
+                ordenar_shell(lista_recetas, clave_fn)
+                print(f"[OK] Catálogo ordenado por {nom_crit} (Shell Sort).")
+            else:
+                print("Algoritmo inválido.")
+                
+        elif opcion == "9":
             pendiente()
         else:
             print("Opción inválida.")

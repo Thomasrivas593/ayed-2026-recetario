@@ -47,15 +47,28 @@ Dónde se usa cada uno en el dominio.
 
 ## 5. Complejidad (E4)
 
+## 5. Complejidad y Rendimiento (E4)
+
 | Operación | Tiempo | Espacio | Por qué |
 | --- | --- | --- | --- |
-|  |  |  |  |
+| Listar catálogo | $O(n)$ | $O(1)$ | Recorre los n elementos una vez (iterador). |
+| Búsqueda lineal | $O(n)$ en el peor / $O(1)$ en el mejor | $O(1)$ | Recorre los n elementos secuencialmente. Toca cada elemento hasta encontrarlo o llegar al final. |
+| Búsqueda binaria | $O(\log n)$ | $O(1)$ | Cada comparación descarta la mitad del rango de búsqueda  . |
+| Ordenar por Selección | $O(n^2)$ siempre | $O(1)$ | Dos bucles anidados: realiza $\approx n^2/2$ comparaciones sin importar si ya está ordenado. |
+| Ordenar por Inserción | $O(n)$ mejor / $O(n^2)$ peor y promedio | $O(1)$ | Si ya está ordenado, hace 1 comparación por elemento; si está al revés, desplaza todo. |
+| Ordenar por Shell Sort | $O(n \log n)$ a $O(n^2)$ | $O(1)$ | Mejora la inserción al comparar elementos separados por una brecha, minimizando desplazamientos pesados (Algoritmo extra). |
+
+
 
 Mediciones (`time.perf_counter`):
 
+
 | Operación | n | segundos |
 | --- | --- | --- |
-|  |  |  |
+| Búsqueda lineal (nombre) | 30 | 0.000012 s |
+| Búsqueda lineal ($n \times 10$) | 300 | 0.000005 s |
+| Búsqueda binaria (nombre) | 30 | 0.000005 s |
+| Búsqueda binaria ($n \times 10$) | 300 |  0.000007 s |
 
 ## 6. Persistencia (E5)
 

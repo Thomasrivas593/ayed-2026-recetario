@@ -20,10 +20,10 @@ Mínimos: 8 casos escritos en E2; ejecutados en E3; 15 de regresión en E6 (pila
 | P06 | E3 | Desapilar historial vacío | pila vacía | excepción propia, menú sigue | devuelve "No hay acciones en el historial para deshacer"  | pasa |
 | P07 | E3 | Desencolar cola vacía | cola vacía | excepción propia, menú sigue | devuelve "No hay recetas en la cola" | pasa |
 | P08 | E3 | Listar colección con el iterador | 2+ ítems | el orden coincide con las inserciones | devuelve "Listado actual del menú:(las recetas agregadas)" | pasa |
-| P09 | E4 | Búsqueda lineal de un nombre que existe |  | lo encuentra |  |  |
-| P10 | E4 | Búsqueda lineal de un nombre que no existe |  | no encontrado, sin traceback |  |  |
-| P11 | E4 | Búsqueda binaria con catálogo desordenado |  | avisa o reordena; no da un falso hit |  |  |
-| P12 | E4 | Ordenar por un criterio y después por otro |  | el orden cambia |  |  |
+| P09 | E4 | Búsqueda lineal de un nombre que existe |  | lo encuentra | devuelve el nombre de la receta | pasa |
+| P10 | E4 | Búsqueda lineal de un nombre que no existe |  | no encontrado, sin traceback | devuelve "no encontrado | pasa |
+| P11 | E4 | Búsqueda binaria con catálogo desordenado |  | avisa o reordena; no da un falso hit | devuelve"[!] Ordenando catálogo por nombre para usar búsqueda binaria..." | pasa |
+| P12 | E4 | Ordenar por un criterio y después por otro |  | el orden cambia | cambia el orden de las recetas, tanto alfabeticamente o por tiempo de preparacion  | pasa |
 | P13 | E5 | Guardar CSV, salir, volver a entrar |  | los datos siguen |  |  |
 | P14 | E5 | Guardar binario y modificar un registro por id |  | al recargar, ese campo cambió |  |  |
 | P15 | E5 | Abrir un binario truncado o con magia mala | archivo basura | excepción de archivo inválido |  |  |
