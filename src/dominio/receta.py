@@ -1,9 +1,9 @@
-#creo la clase receta con sus atributos y metodos
+#creo la clase receta con sus atributos y metodos, clase es un mutable, es decir que se puede modificar sus atributos y metodos
 class Receta:
     def __init__ (self, id_receta, nombre, tiempo_min, dificultad, categoria) :
         self.id = id_receta
         self.nombre = nombre
-        self.tiempo_min = int(tiempo_min)
+        self.tiempo_min = int(tiempo_min) #int, inmutable, no se puede modificar su valor, es decir que no se puede cambiar el valor 
         self.dificultad = dificultad
         self.categoria = categoria
 

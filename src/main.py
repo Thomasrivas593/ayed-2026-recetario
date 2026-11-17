@@ -1,3 +1,4 @@
+from pathlib import Path
 from src.config import TEMA
 from src.dominio.recetario import Recetario
 from src.persistencia.texto import cargar_recetas, cargar_relaciones_subrecetas
@@ -11,6 +12,26 @@ from src.excepciones import ColeccionLlenaError, PilaVaciaError, ColaVaciaError
 # --- IMPORTS AGREGADOS PARA LA ENTREGA 4 ---
 from src.algoritmos.busqueda import busqueda_lineal, busqueda_binaria
 from src.algoritmos.ordenamiento import ordenar_seleccion, ordenar_insercion, ordenar_shell
+
+# --- IMPORTS AGREGADOS PARA LA ENTREGA 5 ---
+from src.dominio.receta import Receta
+from src.excepciones import ArchivoInvalidoError, ItemNoEncontradoError
+from src.persistencia.texto import (
+    RUTA_TXT,
+    ENCABEZADOS_RECETAS,
+    armar_recetas_desde_txt,
+    guardar_texto,
+    filas_desde_recetas,
+)
+from src.persistencia.binario import (
+    RUTA_BIN,
+    guardar_binario,
+    cargar_binario,
+    posicion_del_id,
+    actualizar_registro,
+    alta_binario,
+    baja_binario,
+)
 
 TEMAS = {
     "pokedex": "Pokédex",
@@ -89,6 +110,11 @@ def operacion_recursiva(recetario):
         print(f" - [{sub_id}] {nombre}")
     print("----------------------------------------------------------")
 
+def guardar_todo(recetario):
+    """Mantiene sincronizados memoria, .txt y .bin."""
+    guardar_texto(RUTA_TXT, filas_desde_recetas(recetario), ENCABEZADOS_RECETAS)
+    guardar_binario(RUTA_BIN, recetario)
+
 def main():
     if TEMA not in TEMAS:
         print("Seteá TEMA en src/config.py: 'pokedex', 'recetario' o 'musica'.")
@@ -127,11 +153,14 @@ def main():
             operacion_recursiva(recetario)
             historial.apilar("El usuario ejecutó la operación recursiva.")
             
-        # --- OPCIONES DE LA ENTREGA 3 ---
+        # --- OPCIONES DE LA ENTREGA 3 Y ABM PERSISTENTE (ENTREGA 5) ---
         elif opcion == "6":
             print("\n--- Menú Semanal (Colección con Tope) ---")
             print("A. Agregar receta")
             print("B. Listar menú")
+            print("C. Alta de receta en catálogo (persistente)")
+            print("D. Modificar receta en catálogo (acceso directo)")
+            print("E. Baja de receta en catálogo (persistente)")
             sub6 = input("Opción: ").strip().upper()
             
             if sub6 == "A":
@@ -145,6 +174,72 @@ def main():
             elif sub6 == "B":
                 print("\nListado actual del menú:")
                 menu_coleccion.listar()
+            elif sub6 == "C":
+                try:
+                    nuevo_id = int(input("ID numérico de la nueva receta: ").strip())
+                    if recetario.obtener_por_id(nuevo_id):
+                        print(f"[!] Ya existe una receta con ID {nuevo_id}.")
+                        continue
+                    nombre = input("Nombre: ").strip()
+                    tiempo = int(input("Tiempo en minutos: ").strip())
+                    dificultad = input("Dificultad (baja/media/alta): ").strip()
+                    categoria = input("Categoría: ").strip()
+                    if not nombre or not dificultad or not categoria:
+                        print("[!] Ningún campo de texto puede estar vacío.")
+                        continue
+
+                    if not RUTA_BIN.exists():
+                        guardar_binario(RUTA_BIN, recetario)
+
+                    nueva = Receta(nuevo_id, nombre, tiempo, dificultad, categoria)
+                    recetario.agregar_receta(nueva)
+                    alta_binario(RUTA_BIN, nueva)
+                    guardar_texto(RUTA_TXT, filas_desde_recetas(recetario), ENCABEZADOS_RECETAS)
+                    historial.apilar(f"Alta persistente de receta ID {nuevo_id} ({nombre}).")
+                    print(f"[OK] Receta '{nombre}' guardada en .txt y .bin.")
+                except ValueError:
+                    print("[ERROR] El ID y el tiempo deben ser números enteros.")
+            elif sub6 == "D":
+                try:
+                    id_mod = input("ID de la receta a modificar: ").strip()
+                    posicion = posicion_del_id(recetario, id_mod)
+                    actual = recetario.obtener_por_id(id_mod)
+                    print(f"Actual: {actual}")
+
+                    nuevo_nombre = input(f"Nuevo nombre [{actual.nombre}]: ").strip() or actual.nombre
+                    tiempo_str = input(f"Nuevo tiempo en min [{actual.tiempo_min}]: ").strip()
+                    nuevo_tiempo = int(tiempo_str) if tiempo_str else actual.tiempo_min
+                    nueva_dif = input(f"Nueva dificultad [{actual.dificultad}]: ").strip() or actual.dificultad
+                    nueva_cat = input(f"Nueva categoría [{actual.categoria}]: ").strip() or actual.categoria
+
+                    if not RUTA_BIN.exists():
+                        guardar_binario(RUTA_BIN, recetario)
+
+                    modificada = Receta(int(actual.id), nuevo_nombre, nuevo_tiempo, nueva_dif, nueva_cat)
+                    recetario.obtener_todas()[posicion] = modificada
+                    actualizar_registro(RUTA_BIN, posicion, modificada)
+                    guardar_texto(RUTA_TXT, filas_desde_recetas(recetario), ENCABEZADOS_RECETAS)
+                    historial.apilar(f"Modificación directa (seek pos {posicion}) de receta ID {id_mod}.")
+                    print(f"[OK] Registro en posición {posicion} actualizado con acceso directo.")
+                except ItemNoEncontradoError as e:
+                    print(f"[ERROR] {e}")
+                except ValueError:
+                    print("[ERROR] El tiempo debe ser un número entero.")
+            elif sub6 == "E":
+                try:
+                    id_baja = input("ID de la receta a eliminar: ").strip()
+                    posicion = posicion_del_id(recetario, id_baja)
+                    if not RUTA_BIN.exists():
+                        guardar_binario(RUTA_BIN, recetario)
+                    eliminada = recetario.obtener_todas().pop(posicion)
+                    baja_binario(RUTA_BIN, posicion)
+                    guardar_texto(RUTA_TXT, filas_desde_recetas(recetario), ENCABEZADOS_RECETAS)
+                    historial.apilar(f"Baja persistente de receta ID {id_baja} ({eliminada.nombre}).")
+                    print(f"[OK] Receta '{eliminada.nombre}' eliminada de memoria, .txt y .bin.")
+                except ItemNoEncontradoError as e:
+                    print(f"[ERROR] {e}")
+            else:
+                print("Opción inválida.")
                 
         elif opcion == "7":
             print("\n--- Historial de Acciones (Pila) ---")
@@ -191,6 +286,7 @@ def main():
             elif sub == "2":
                 print("[!] Ordenando catálogo por nombre para usar búsqueda binaria...")
                 ordenar_insercion(lista_recetas, lambda r: r.nombre.lower())
+                guardar_todo(recetario)
                 resultado = busqueda_binaria(lista_recetas, clave_buscada, lambda r: r.nombre.lower())
                 print(f"[ENCONTRADO] {resultado.nombre}" if resultado else "[!] No encontrado.")
             else:
@@ -218,18 +314,54 @@ def main():
             
             if algo == "1":
                 ordenar_seleccion(lista_recetas, clave_fn)
+                guardar_todo(recetario)
                 print(f"[OK] Catálogo ordenado por {nom_crit} (Selección).")
             elif algo == "2":
                 ordenar_insercion(lista_recetas, clave_fn)
+                guardar_todo(recetario)
                 print(f"[OK] Catálogo ordenado por {nom_crit} (Inserción).")
             elif algo == "3":
                 ordenar_shell(lista_recetas, clave_fn)
+                guardar_todo(recetario)
                 print(f"[OK] Catálogo ordenado por {nom_crit} (Shell Sort).")
             else:
                 print("Algoritmo inválido.")
-                
+
+        # --- OPCIONES DE LA ENTREGA 5 ---
         elif opcion == "9":
-            pendiente()
+            print("\n--- Guardar / Cargar Archivos ---")
+            print("a) Cargar catálogo desde .txt (data/recetas.txt)")
+            print("b) Guardar catálogo en .txt (data/recetas.txt)")
+            print("c) Guardar catálogo en binario (data/recetas.bin)")
+            print("d) Cargar catálogo desde binario (data/recetas.bin)")
+            print("e) Cargar archivo por ruta (validar ArchivoInvalidoError)")
+            sub = input("Subopción > ").strip().lower()
+
+            try:
+                if sub == "a":
+                    recetario.recetas = armar_recetas_desde_txt(RUTA_TXT)
+                    print(f"[OK] Catálogo cargado desde .txt: {len(recetario)} ítems.")
+                elif sub == "b":
+                    guardar_texto(RUTA_TXT, filas_desde_recetas(recetario), ENCABEZADOS_RECETAS)
+                    print(f"[OK] Catálogo guardado en {RUTA_TXT}.")
+                elif sub == "c":
+                    guardar_binario(RUTA_BIN, recetario)
+                    print(f"[OK] Catálogo guardado en {RUTA_BIN}.")
+                elif sub == "d":
+                    recetario.recetas = cargar_binario(RUTA_BIN)
+                    print(f"[OK] Catálogo cargado desde .bin: {len(recetario)} ítems.")
+                elif sub == "e":
+                    ruta_custom = Path(input("Ruta del archivo a validar (ej. data/basura.bin): ").strip())
+                    if ruta_custom.suffix.lower() == ".txt":
+                        recetario.recetas = armar_recetas_desde_txt(ruta_custom)
+                    else:
+                        recetario.recetas = cargar_binario(ruta_custom)
+                    print(f"[OK] Archivo válido cargado: {len(recetario)} ítems.")
+                else:
+                    print("Subopción inválida.")
+            except ArchivoInvalidoError as error:
+                print(f"[ERROR] Archivo inválido: {error}")
+
         else:
             print("Opción inválida.")
 

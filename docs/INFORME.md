@@ -72,10 +72,17 @@ Mediciones (`time.perf_counter`):
 
 ## 6. Persistencia (E5)
 
-- Layout del registro binario (campos, `struct`, anchos):
-- Header:
-- Cómo se actualiza un registro por posición:
-
+- **Layout del registro binario (campos, `struct`, anchos):** Elegí `struct.Struct("<I 35s H 12s 20s")`, lo que da un tamaño fijo de **73 bytes** por receta:
+  - `id` (`I`, 4 bytes): número entero para el ID.
+  - `nombre` (`35s`, 35 bytes): texto en UTF-8 rellenado con `\x00` (elegí 35 bytes para que entren nombres largos como *"Panqueques con dulce de leche"* sin cortarse).
+  - `tiempo_min` (`H`, 2 bytes): entero corto para los minutos de preparación.
+  - `dificultad` (`12s`, 12 bytes): texto en UTF-8 rellenado con `\x00` (`baja`, `media`, `alta`).
+  - `categoria` (`20s`, 20 bytes): texto en UTF-8 rellenado con `\x00` (`salsa`, `principal`, `acompanamiento`, etc.).
+- **Header:** Uso `struct.Struct("<4s 1s I")` (**9 bytes** al principio del archivo) para validar el archivo antes de leer las recetas:
+  - `magia` (`4s`, 4 bytes): texto fijo `AYED` para comprobar que el archivo lo generó mi programa.
+  - `tema` (`1s`, 1 byte): letra `R` para indicar que pertenece al tema Recetario.
+  - `cantidad` (`I`, 4 bytes): entero con el total de recetas guardadas.
+- **Cómo se actualiza un registro por posición:** Como el header mide siempre 9 bytes y cada receta ocupa exactamente 73 bytes, puedo calcular en qué byte empieza cualquier registro (`0-based`) sin leer los anteriores ($O(1)$). Abro el archivo en modo `"r+b"`, salto directo con `seek(9 + posicion * 73)` y piso solo esos 73 bytes con `write()`. Para el alta agrego el registro al final (`seek(0, 2)`) y sumo 1 a la cantidad en el header; para la baja reescribo los registros que quedan para no dejar huecos vacíos en el medio.
 ## 7. Reparto de trabajo (E6)
 
 | Integrante | Qué hizo | Qué puede defender |
