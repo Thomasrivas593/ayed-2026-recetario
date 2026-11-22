@@ -88,3 +88,4 @@ Mediciones (`time.perf_counter`):
 | Integrante | Qué hizo | Qué puede defender |
 | --- | --- | --- |
 |  |  |  |
+Rivas, hice todo el trabajo, me quedé solo en la 2da entrega, mi compañera dejó

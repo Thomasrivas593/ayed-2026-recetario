@@ -11,6 +11,6 @@ Fecha de esta versión del archivo:
 | E3 | semana del 28/9 | gemini | explicacion de la entrega 3 (consigna), ayuda para la conexion de modulos/tads | no copie ni pegue nada directamente, pero si me sirvio de guia para saber que hacer y como hacerlo | Rivas |  |
 | E4 | semana del 12/10 | gemini | ayuda para la explicacion de la consigna, y creacion de codigo para el informe. Ayuda para integrar main.py con las nuevas opciones | pegue directamente el codigo para time.perf. | tuve que reescribir en las opciones 3 y 4 (en main.py) | Rivas |
 | E5 | semana del 13/11 | gemini/chat gpt  | ayuda para generacion de codigo para texto.py y binario.py, tambien para el informe  | tuve que agregar cosas en el codigo  | Rivas |  |
-| E6 |  |  |  |  |  |  |
+| E6 | viernes20 / sabado21 |gemini/chatgpt |  le pasé partes del codigo (main.py) para verificar que esté todo|  |  |  |
 
 Compromiso: cualquiera del grupo puede explicar cualquier archivo del tag.
